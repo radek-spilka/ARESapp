@@ -14,15 +14,14 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $errorMessage = null;
         $companyData = null;
         $inputValue = $this->getRequest()->getPost('inputField');
+        $searchHistory = $this->getSession('search')->searchHistory ?? [];
 
         if ($this->getRequest()->isMethod('POST')) {
             $inputField = $this->getRequest()->getPost('inputField');
 
             if($inputField == ""){
-                return;
-            }
-
-            if (strlen($inputField) !== 8 || !ctype_digit($inputField)) {
+                $errorMessage = 'Pole je prázdné';
+            } elseif (strlen($inputField) !== 8 || !ctype_digit($inputField)) {
                 $errorMessage = 'Špatný formát IČO';
             } else {
                 $url = 'https://ares.gov.cz/ekonomicke-subjekty-v-be/rest/ekonomicke-subjekty/' . $inputField;
@@ -41,6 +40,11 @@ final class HomePresenter extends Nette\Application\UI\Presenter
                             'sidlo' => $data['sidlo']['textovaAdresa'],
                             'datumVzniku' => $data['datumVzniku']
                         ];
+
+                        array_unshift($searchHistory, $inputField);
+                        $searchHistory = array_slice($searchHistory, 0, 10);
+                        
+                        $this->getSession('search')->searchHistory = $searchHistory;
                     } else {
                         $errorMessage = 'Ekonomický subjekt nebyl nalezen';
                     }
@@ -51,6 +55,6 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $this->template->errorMessage = $errorMessage;
         $this->template->companyData = $companyData;
         $this->template->inputValue = $inputValue;
+        $this->template->searchHistory = $searchHistory;
     }
 }
-?>
