@@ -20,7 +20,7 @@ final class HomePresenter extends Nette\Application\UI\Presenter
             $inputField = $this->getRequest()->getPost('inputField');
 
             if($inputField == ""){
-                $errorMessage = 'Pole je prázdné';
+                $errorMessage = null;
             } elseif (strlen($inputField) !== 8 || !ctype_digit($inputField)) {
                 $errorMessage = 'Špatný formát IČO';
             } else {
